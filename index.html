@@ -59,46 +59,51 @@
 <iframe id="jotform-frame" src="https://form.jotform.com/251917269087064"></iframe>
 
 <!-- Botón ordenar con carrito -->
-<button class="order-button" id="order-button" onclick="openForm()">🛒 Ordena aquí</button>
+<button class="order-button" id="order-button">🛒 Ordena aquí</button>
 
 <script>
-  const jotformFrame = document.getElementById('jotform-frame');
-  const orderButton = document.getElementById('order-button');
-  let inactivityTimer;
+const jotformFrame = document.getElementById('jotform-frame');
+const orderButton = document.getElementById('order-button');
+let inactivityTimer;
+let isFormVisible = false;
 
-  function openForm() {
+function resetInactivityTimer() {
+    if (isFormVisible) {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            closeForm();
+        }, 60000); // 60 segundos de inactividad real
+    }
+}
+
+function openForm() {
     jotformFrame.style.display = 'block';
     orderButton.style.display = 'none'; // Ocultar el botón cuando se abre el formulario
-    startInactivityTimer();
+    isFormVisible = true;
+    resetInactivityTimer();
 
-    document.onmousemove = resetInactivityTimer;
-    document.onkeypress = resetInactivityTimer;
-    document.ontouchstart = resetInactivityTimer;
-    document.onclick = resetInactivityTimer;
-  }
+    // Escucha actividad SOLO dentro del iframe utilizando un proxy de eventos en window
+    ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(event => {
+        window.addEventListener(event, resetInactivityTimer);
+    });
+}
 
-  function startInactivityTimer() {
-    clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(closeForm, 60000); // 60 segundos
-  }
-
-  function resetInactivityTimer() {
-    clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(closeForm, 60000);
-  }
-
-  function closeForm() {
+function closeForm() {
     jotformFrame.style.display = 'none';
     orderButton.style.display = 'block'; // Mostrar nuevamente el botón
+    isFormVisible = false;
     clearTimeout(inactivityTimer);
 
-    document.onmousemove = null;
-    document.onkeypress = null;
-    document.ontouchstart = null;
-    document.onclick = null;
-  }
+    ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(event => {
+        window.removeEventListener(event, resetInactivityTimer);
+    });
+}
+
+// Asignar el botón a abrir el formulario
+orderButton.addEventListener('click', openForm);
 </script>
 
 </body>
 </html>
+
 
