@@ -27,8 +27,8 @@
   button.order-button {
     position: fixed;
     bottom: 30px; right: 30px;
-    padding: 45px 70px; /* 3x más grande */
-    font-size: 3rem;    /* 3x más grande */
+    padding: 45px 70px; /* Tamaño grande */
+    font-size: 3rem;
     border: none;
     border-radius: 20px;
     background-color: rgba(255,255,255,0.9);
@@ -59,14 +59,16 @@
 <iframe id="jotform-frame" src="https://form.jotform.com/251917269087064"></iframe>
 
 <!-- Botón ordenar con carrito -->
-<button class="order-button" onclick="openForm()">🛒 Ordena aquí</button>
+<button class="order-button" id="order-button" onclick="openForm()">🛒 Ordena aquí</button>
 
 <script>
   const jotformFrame = document.getElementById('jotform-frame');
+  const orderButton = document.getElementById('order-button');
   let inactivityTimer;
 
   function openForm() {
     jotformFrame.style.display = 'block';
+    orderButton.style.display = 'none'; // Ocultar el botón cuando se abre el formulario
     startInactivityTimer();
 
     document.onmousemove = resetInactivityTimer;
@@ -87,6 +89,7 @@
 
   function closeForm() {
     jotformFrame.style.display = 'none';
+    orderButton.style.display = 'block'; // Mostrar nuevamente el botón
     clearTimeout(inactivityTimer);
 
     document.onmousemove = null;
@@ -98,3 +101,4 @@
 
 </body>
 </html>
+
