@@ -21,9 +21,8 @@ img.qr-code { position:fixed; bottom:30px; left:30px; width:120px; height:auto; 
 Tu navegador no soporta video HTML5.
 </video>
 
-<iframe id="jotform-frame" src="https://form.jotform.com/251917269087064"></iframe>
+<iframe id="jotform-frame" src="https://form.jotform.com/251917269087064" id="jotform-frame"></iframe>
 
-<!-- QR siempre visible durante el loop del video -->
 <img src="QR.png" alt="QR Ordena Smoothie Lab" class="qr-code" id="qr-code" />
 
 <button class="order-button" id="order-button">🛒 Ordena aquí</button>
@@ -33,11 +32,12 @@ const jotformFrame = document.getElementById('jotform-frame');
 const orderButton = document.getElementById('order-button');
 const qrCode = document.getElementById('qr-code');
 let inactivityTimer;
+let confirmationInactivityTimer;
 let isFormVisible = false;
 
 function startInactivityTimer() {
     clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => { closeForm(); }, 60000); // 60 segundos
+    inactivityTimer = setTimeout(() => { closeForm(); }, 15000); // 15 segundos de inactividad en confirmación
 }
 
 function resetInactivityTimer() {
@@ -51,7 +51,6 @@ function openForm() {
     orderButton.style.display = 'none';
     qrCode.style.display = 'none';
     isFormVisible = true;
-    startInactivityTimer();
 
     window.addEventListener('mousemove', resetInactivityTimer);
     window.addEventListener('keydown', resetInactivityTimer);
@@ -66,6 +65,7 @@ function closeForm() {
     qrCode.style.display = 'block';
     isFormVisible = false;
     clearTimeout(inactivityTimer);
+    clearTimeout(confirmationInactivityTimer);
 
     window.removeEventListener('mousemove', resetInactivityTimer);
     window.removeEventListener('keydown', resetInactivityTimer);
@@ -74,10 +74,29 @@ function closeForm() {
     window.removeEventListener('click', resetInactivityTimer);
 }
 
+// Detectar cuando el formulario cambia a la pantalla de confirmación
+document.getElementById('jotform-frame').addEventListener('load', () => {
+    const frame = document.getElementById('jotform-frame');
+    try {
+        const frameUrl = frame.contentWindow.location.href;
+        if (frameUrl.includes('thankyou')) {
+            // Esperar 10 segundos en pantalla de confirmación
+            clearTimeout(confirmationInactivityTimer);
+            confirmationInactivityTimer = setTimeout(() => {
+                frame.contentWindow.location.reload(); // Reiniciar formulario tras 10 segundos
+            }, 10000);
+
+            // Iniciar inactividad de 15 segundos para regresar al video
+            startInactivityTimer();
+        }
+    } catch (e) {
+        // No se puede leer la URL por política de CORS, ignorar
+    }
+});
+
 orderButton.addEventListener('click', openForm);
 </script>
 
 </body>
 </html>
-
 
