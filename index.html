@@ -5,60 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Smoothie Lab - Ordena Aquí</title>
 <style>
-  html, body {
-    margin: 0; padding: 0; height: 100%; overflow: hidden;
-    background: black;
-  }
-  video#bg-video {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-    z-index: 0;
-  }
-  iframe#jotform-frame {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    border: none;
-    z-index: 2;
-    display: none;
-  }
-  button.order-button {
-    position: fixed;
-    bottom: 30px; right: 30px;
-    padding: 45px 70px; /* Tamaño grande */
-    font-size: 3rem;
-    border: none;
-    border-radius: 20px;
-    background-color: rgba(255,255,255,0.9);
-    cursor: pointer;
-    animation: pulse 1.5s infinite;
-    z-index: 3;
-    transition: transform 0.3s;
-  }
-  button.order-button:hover {
-    transform: scale(1.05);
-  }
-  @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.08); }
-    100% { transform: scale(1); }
-  }
+html, body { margin:0; padding:0; height:100%; overflow:hidden; background:black; }
+video#bg-video { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:0; }
+iframe#jotform-frame { position:absolute; top:0; left:0; width:100%; height:100%; border:none; z-index:2; display:none; }
+button.order-button { position:fixed; bottom:30px; right:30px; padding:45px 70px; font-size:3rem; border:none; border-radius:20px; background-color:rgba(255,255,255,0.9); cursor:pointer; animation:pulse 1.5s infinite; z-index:3; transition:transform 0.3s; }
+button.order-button:hover { transform:scale(1.05); }
+img.qr-code { position:fixed; bottom:30px; left:30px; width:120px; height:auto; z-index:3; border-radius:12px; }
+@keyframes pulse { 0%{transform:scale(1);} 50%{transform:scale(1.08);} 100%{transform:scale(1);} }
 </style>
 </head>
 <body>
 
-<!-- Video MP4 local en loop -->
 <video id="bg-video" autoplay muted loop playsinline>
-  <source src="smoothie-lab-video.mp4" type="video/mp4" />
-  Tu navegador no soporta video HTML5.
+<source src="smoothie-lab-video.mp4" type="video/mp4" />
+Tu navegador no soporta video HTML5.
 </video>
 
-<!-- Formulario Jotform oculto inicialmente -->
 <iframe id="jotform-frame" src="https://form.jotform.com/251917269087064"></iframe>
 
-<!-- Botón ordenar con carrito -->
+<!-- QR siempre visible durante el loop del video -->
+<img src="QR.png" alt="QR Ordena Smoothie Lab" class="qr-code" />
+
 <button class="order-button" id="order-button">🛒 Ordena aquí</button>
 
 <script>
@@ -67,43 +34,48 @@ const orderButton = document.getElementById('order-button');
 let inactivityTimer;
 let isFormVisible = false;
 
+function startInactivityTimer() {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => { closeForm(); }, 60000); // 60 segundos
+}
+
 function resetInactivityTimer() {
     if (isFormVisible) {
-        clearTimeout(inactivityTimer);
-        inactivityTimer = setTimeout(() => {
-            closeForm();
-        }, 60000); // 60 segundos de inactividad real
+        startInactivityTimer();
     }
 }
 
 function openForm() {
     jotformFrame.style.display = 'block';
-    orderButton.style.display = 'none'; // Ocultar el botón cuando se abre el formulario
+    orderButton.style.display = 'none';
     isFormVisible = true;
-    resetInactivityTimer();
+    startInactivityTimer();
 
-    // Escucha actividad SOLO dentro del iframe utilizando un proxy de eventos en window
-    ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(event => {
-        window.addEventListener(event, resetInactivityTimer);
-    });
+    window.addEventListener('mousemove', resetInactivityTimer);
+    window.addEventListener('keydown', resetInactivityTimer);
+    window.addEventListener('scroll', resetInactivityTimer);
+    window.addEventListener('touchstart', resetInactivityTimer);
+    window.addEventListener('click', resetInactivityTimer);
 }
 
 function closeForm() {
     jotformFrame.style.display = 'none';
-    orderButton.style.display = 'block'; // Mostrar nuevamente el botón
+    orderButton.style.display = 'block';
     isFormVisible = false;
     clearTimeout(inactivityTimer);
 
-    ['mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(event => {
-        window.removeEventListener(event, resetInactivityTimer);
-    });
+    window.removeEventListener('mousemove', resetInactivityTimer);
+    window.removeEventListener('keydown', resetInactivityTimer);
+    window.removeEventListener('scroll', resetInactivityTimer);
+    window.removeEventListener('touchstart', resetInactivityTimer);
+    window.removeEventListener('click', resetInactivityTimer);
 }
 
-// Asignar el botón a abrir el formulario
 orderButton.addEventListener('click', openForm);
 </script>
 
 </body>
 </html>
+
 
 
