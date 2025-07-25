@@ -24,13 +24,14 @@ Tu navegador no soporta video HTML5.
 <iframe id="jotform-frame" src="https://form.jotform.com/251917269087064"></iframe>
 
 <!-- QR siempre visible durante el loop del video -->
-<img src="QR.png" alt="QR Ordena Smoothie Lab" class="qr-code" />
+<img src="QR.png" alt="QR Ordena Smoothie Lab" class="qr-code" id="qr-code" />
 
 <button class="order-button" id="order-button">🛒 Ordena aquí</button>
 
 <script>
 const jotformFrame = document.getElementById('jotform-frame');
 const orderButton = document.getElementById('order-button');
+const qrCode = document.getElementById('qr-code');
 let inactivityTimer;
 let isFormVisible = false;
 
@@ -48,6 +49,7 @@ function resetInactivityTimer() {
 function openForm() {
     jotformFrame.style.display = 'block';
     orderButton.style.display = 'none';
+    qrCode.style.display = 'none';
     isFormVisible = true;
     startInactivityTimer();
 
@@ -61,6 +63,7 @@ function openForm() {
 function closeForm() {
     jotformFrame.style.display = 'none';
     orderButton.style.display = 'block';
+    qrCode.style.display = 'block';
     isFormVisible = false;
     clearTimeout(inactivityTimer);
 
@@ -76,6 +79,5 @@ orderButton.addEventListener('click', openForm);
 
 </body>
 </html>
-
 
 
